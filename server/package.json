@@ -1,0 +1,29 @@
+{
+  "name": "restaurant-qr-menu-server",
+  "private": true,
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "type": "commonjs",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "start": "node src/index.js",
+    "build": "echo \"Server is plain Node.js; no build step required.\""
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.110.2",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.2",
+    "express-rate-limit": "^7.5.1",
+    "express-validator": "^7.2.1",
+    "helmet": "^8.1.0",
+    "mongoose": "^8.14.1",
+    "morgan": "^1.10.0",
+    "multer": "^2.0.1",
+    "sanitize-html": "^2.17.0",
+    "socket.io": "^4.8.1"
+  },
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  }
+}
