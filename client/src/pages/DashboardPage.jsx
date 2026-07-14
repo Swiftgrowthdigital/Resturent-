@@ -11,7 +11,7 @@ import { Pagination } from '../components/common/Pagination';
 import { ADMIN_TOKEN_KEY, api } from '../lib/api';
 import { toArray } from '../lib/arrays';
 import { formatCurrency } from '../lib/order';
-import { getSocket } from '../lib/socket';
+import { getSocket, subscribeDashboard } from '../lib/socket';
 import { useMenu } from '../context/MenuContext';
 
 const tabs = ['Dashboard', 'Orders', 'Categories', 'Menu', 'Seats'];
@@ -26,6 +26,7 @@ function DashboardPageContent() {
   const requestedPage = Math.max(1, Number.parseInt(searchParams.get('page'), 10) || 1);
   const [orders, setOrders] = useState([]); const [foods, setFoods] = useState([]); const [categories, setCategories] = useState([]); const [seats, setSeats] = useState([]);
   const [loading, setLoading] = useState(true); const [saving, setSaving] = useState(false); const [modal, setModal] = useState(null); const [form, setForm] = useState({});
+  const [liveStatus, setLiveStatus] = useState('connecting');
   const notified = useRef(new Set());
   const notificationSound = useRef(null);
   const today = useCallback((order) => new Date(order.createdAt).toDateString() === new Date().toDateString(), []);
@@ -36,7 +37,10 @@ function DashboardPageContent() {
     } catch (error) { toast.error(error.response?.data?.message || 'Failed to load dashboard'); } finally { setLoading(false); }
   }, [today]);
   useEffect(() => {
-    load(); const socket = getSocket(); socket.connect();
+    load(); const socket = getSocket();
+    const handleConnect = () => { subscribeDashboard(socket); setLiveStatus('connected'); };
+    const handleDisconnect = () => setLiveStatus('reconnecting');
+    const handleConnectError = () => setLiveStatus('reconnecting');
     const newOrder = (order) => {
       if (notified.current.has(order._id)) return;
       notified.current.add(order._id);
@@ -51,8 +55,10 @@ function DashboardPageContent() {
       if (today(order)) setOrders((current) => [order, ...current.filter((item) => item._id !== order._id)]);
     };
     if ('Notification' in window && Notification.permission === 'default') Notification.requestPermission().catch(() => {});
+    socket.on('connect', handleConnect); socket.on('disconnect', handleDisconnect); socket.on('connect_error', handleConnectError);
     socket.on('new-order', newOrder); socket.on('order:updated', load); socket.on('menu:updated', load);
-    return () => { socket.off('new-order', newOrder); socket.off('order:updated', load); socket.off('menu:updated', load); notificationSound.current?.pause(); };
+    if (socket.connected) handleConnect(); else socket.connect();
+    return () => { socket.off('connect', handleConnect); socket.off('disconnect', handleDisconnect); socket.off('connect_error', handleConnectError); socket.off('new-order', newOrder); socket.off('order:updated', load); socket.off('menu:updated', load); socket.emit('dashboard:unsubscribe'); notificationSound.current?.pause(); };
   }, [load]);
   const stats = useMemo(() => ({ total: orders.length, pending: orders.filter((o) => o.status === 'Pending').length, confirmed: orders.filter((o) => o.status === 'Confirmed').length, cancelled: orders.filter((o) => o.status === 'Cancelled').length, revenue: orders.filter((o) => o.status !== 'Cancelled').reduce((sum, o) => sum + Number(o.grandTotal ?? o.totalAmount ?? 0), 0) }), [orders]);
   const tabRows = tab === 'Orders' ? orders : tab === 'Categories' ? categories : tab === 'Menu' ? foods : tab === 'Seats' ? seats : [];
@@ -73,7 +79,7 @@ function DashboardPageContent() {
   async function save(e) { e.preventDefault(); setSaving(true); const { type, entity } = modal; try { let image; if (form.image) { const accepted = ['image/jpeg', 'image/png', 'image/webp']; if (!accepted.includes(form.image.type) || form.image.size > 5 * 1024 * 1024) throw new Error('Use a JPEG, PNG, or WebP image no larger than 5MB.'); const upload = new FormData(); upload.append('image', form.image); upload.append('type', type === 'food' ? 'food' : 'category'); image = (await api.post('/api/upload', upload)).data.url; toast.success('Image uploaded'); } if (type === 'food') { const data = { name: form.name, category: form.category, price: Number(form.price), available: form.available, outOfStock: !form.available, ...(image ? { image } : {}) }; entity ? await api.put(`/api/foods/${entity._id}`, data) : await api.post('/api/foods', data); } if (type === 'category') { const data = { name: form.name, icon: form.icon || '', status: form.status, ...(image ? { image } : {}) }; entity ? await api.put(`/api/categories/${entity._id}`, data) : await api.post('/api/categories', data); } if (type === 'seat') { const data = { seatNumber: form.seatNumber, active: form.active }; entity ? await api.put(`/api/seats/${entity._id}`, data) : await api.post('/api/seats', data); } toast.success(`${type === 'food' ? 'Menu item' : type === 'seat' ? 'Seat' : 'Category'} saved`); setModal(null); load(); } catch (err) { toast.error(err.response?.data?.message || err.message || 'Could not save changes'); } finally { setSaving(false); } }
   async function remove(type, entity) { if (!window.confirm(`Delete ${entity.name || entity.seatNumber}?`)) return; try { await api.delete(`/api/${type === 'food' ? 'foods' : type === 'seat' ? 'seats' : 'categories'}/${entity._id}`); toast.success('Deleted'); load(); } catch (e) { toast.error(e.response?.data?.message || 'Could not delete'); } }
   if (loading) return <LoadingScreen label="Loading dashboard..." variant="dashboard" />;
-  return <main className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6"><header className="mb-5 flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[.2em] text-brand-300">{restaurantName} admin</p><h1 className="mt-1 text-3xl font-black text-white">Today's Orders</h1></div><span className="premium-chip">Live updates on</span></header><nav className="no-scrollbar mb-5 flex gap-2 overflow-x-auto border-b border-white/10 pb-3">{tabs.map((item) => <button key={item} onClick={() => updateQuery(item, 1)} className={`focus-ring whitespace-nowrap rounded-xl px-4 py-2 text-sm font-bold transition duration-200 ${tab === item ? 'bg-orange-500 text-white' : 'bg-white/[.05] text-slate-300 hover:bg-white/[.1]'}`}>{item}</button>)}</nav>
+  return <main className="mx-auto w-full max-w-5xl px-4 py-5 sm:px-6"><header className="mb-5 flex flex-wrap items-end justify-between gap-3"><div><p className="text-xs font-bold uppercase tracking-[.2em] text-brand-300">{restaurantName} admin</p><h1 className="mt-1 text-3xl font-black text-white">Today's Orders</h1></div><span className={`premium-chip ${liveStatus === 'connected' ? 'text-emerald-300' : 'text-amber-300'}`}><span className={`h-2 w-2 rounded-full ${liveStatus === 'connected' ? 'bg-emerald-400 shadow-[0_0_12px_rgba(74,222,128,0.9)]' : 'animate-pulse bg-amber-400'}`} />{liveStatus === 'connected' ? 'Live Updates' : 'Reconnecting...'}</span></header><nav className="no-scrollbar mb-5 flex gap-2 overflow-x-auto border-b border-white/10 pb-3">{tabs.map((item) => <button key={item} onClick={() => updateQuery(item, 1)} className={`focus-ring whitespace-nowrap rounded-xl px-4 py-2 text-sm font-bold transition duration-200 ${tab === item ? 'bg-orange-500 text-white' : 'bg-white/[.05] text-slate-300 hover:bg-white/[.1]'}`}>{item}</button>)}</nav>
     {tab === 'Dashboard' ? <Dashboard stats={stats} currency={currency} /> : null}
     {tab === 'Orders' ? <Orders orders={paginatedRows} totalItems={orders.length} currentPage={currentPage} totalPages={totalPages} onPageChange={(page) => updateQuery(tab, page)} onAction={orderAction} /> : null}
     {tab === 'Categories' ? <Management title="Categories" action="Create Category" onAdd={() => open('category')} rows={paginatedRows} totalItems={categories.length} currentPage={currentPage} totalPages={totalPages} onPageChange={(page) => updateQuery(tab, page)} empty="No categories yet." render={(c) => <Row image={c.image} name={`${c.icon || ''} ${c.name}`} state={c.status !== false ? 'Active' : 'Disabled'} onEdit={() => open('category', c)} onDelete={() => remove('category', c)} />} /> : null}
