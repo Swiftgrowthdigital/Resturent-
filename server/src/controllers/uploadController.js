@@ -32,7 +32,10 @@ const uploadImage = asyncHandler(async (req, res) => {
     upsert: false
   });
 
-  if (error) return res.status(502).json({ message: 'Unable to upload image to Supabase Storage' });
+  if (error) {
+    console.error('[Supabase Storage upload error]', { bucket, message: error.message, statusCode: error.statusCode });
+    return res.status(502).json({ message: 'Unable to upload image to Supabase Storage' });
+  }
   const { data } = supabase.storage.from(bucket).getPublicUrl(fileName);
   return res.status(201).json({ url: data.publicUrl });
 });

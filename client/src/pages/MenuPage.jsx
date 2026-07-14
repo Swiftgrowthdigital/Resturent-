@@ -18,7 +18,7 @@ import { placeMenuOrder } from '../services/menuService';
 
 export function MenuPage() {
   const navigate = useNavigate();
-  const { categories, foods, settings, availableSeats, loading, error, refresh } = useMenu();
+  const { categories, foods, settings, restaurantName, availableSeats, loading, error, refresh } = useMenu();
   const [activeCategory, setActiveCategory] = useState('all');
   const deferredQuery = useDeferredValue('');
   const [seatNumber, setSeatNumber] = useState('');
@@ -110,7 +110,7 @@ export function MenuPage() {
       className="min-h-screen bg-[#faf7f2] pb-32 text-stone-950"
     >
       <Header
-        restaurantName={settings?.name || settings?.restaurantName || ''}
+        restaurantName={restaurantName}
         address={settings?.address || 'Dine-in ordering'}
         status={settings?.isOpen === false ? 'Closed' : 'Open Now'}
       />
@@ -166,6 +166,7 @@ export function MenuPage() {
 
       <footer className="mx-auto max-w-3xl px-4 pb-4 text-center text-xs text-stone-400">
         <div className="border-t border-stone-200 pt-5">
+          <p className="font-semibold text-stone-500">{restaurantName}</p>
           <p>Designed &amp; Developed by</p>
           <a className="mt-1 inline-block font-semibold text-stone-500 transition hover:text-stone-900" href="https://swiftgrowthdigital.com" target="_blank" rel="noreferrer">SwiftGrowthDigital.com</a>
         </div>

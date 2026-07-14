@@ -272,9 +272,10 @@ async function connectDatabase() {
     throw new Error('MONGODB_URI is required. Copy server/.env.example to server/.env and provide a reachable MongoDB URI.');
   }
 
-  await mongoose.connect(process.env.MONGODB_URI);
+  await mongoose.connect(process.env.MONGODB_URI, { serverSelectionTimeoutMS: 10000 });
+  await mongoose.connection.db.admin().ping();
   await seedDefaults();
-  console.log('MongoDB connected');
+  console.log('MongoDB Atlas connected and verified');
 }
 
 module.exports = { connectDatabase };

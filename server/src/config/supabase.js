@@ -8,7 +8,17 @@ function getSupabaseStorageClient() {
 }
 
 function getStorageBucket() {
-  return process.env.SUPABASE_STORAGE_BUCKET || 'restaurant-images';
+  return process.env.SUPABASE_STORAGE_BUCKET;
 }
 
-module.exports = { getSupabaseStorageClient, getStorageBucket };
+async function verifySupabaseStorage() {
+  const supabase = getSupabaseStorageClient();
+  const bucket = getStorageBucket();
+  if (!supabase || !bucket) throw new Error('Supabase Storage is not configured. SUPABASE_URL, SUPABASE_SERVICE_ROLE_KEY, and SUPABASE_STORAGE_BUCKET are required.');
+
+  const { data, error } = await supabase.storage.getBucket(bucket);
+  if (error || !data) throw new Error(`Supabase Storage bucket "${bucket}" could not be verified: ${error?.message || 'bucket not found'}`);
+  console.log(`Supabase Storage bucket verified: ${bucket}`);
+}
+
+module.exports = { getSupabaseStorageClient, getStorageBucket, verifySupabaseStorage };

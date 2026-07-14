@@ -1,5 +1,5 @@
 function getRestaurantName() {
-  return String(process.env.RESTAURANT_NAME || '').trim();
+  return String(process.env.RESTAURANT_NAME || '').trim() || 'Restaurant';
 }
 
 function applyRestaurantName(restaurant) {

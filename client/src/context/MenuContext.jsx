@@ -3,6 +3,7 @@ import { normalizeMenuPayload } from '../lib/arrays';
 import { getMenu } from '../services/menuService';
 import { api } from '../lib/api';
 import { getSocket } from '../lib/socket';
+import { fallbackRestaurantName, getRestaurantName } from '../lib/brand';
 
 const MenuContext = createContext(null);
 
@@ -10,11 +11,24 @@ export function MenuProvider({ children }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
   const [data, setData] = useState({ categories: [], foods: [], settings: null, availableSeats: [] });
+  const [restaurantName, setRestaurantName] = useState(fallbackRestaurantName);
 
   async function refresh() {
     setLoading(true);
     try {
-      setData(normalizeMenuPayload(await getMenu()));
+      const [menuResult, brandResult] = await Promise.allSettled([
+        getMenu(),
+        api.get('/api/brand')
+      ]);
+
+      if (brandResult.status === 'fulfilled') {
+        setRestaurantName(getRestaurantName(brandResult.value.data?.name));
+      } else {
+        setRestaurantName(fallbackRestaurantName);
+      }
+
+      if (menuResult.status === 'rejected') throw menuResult.reason;
+      setData(normalizeMenuPayload(menuResult.value));
       setError('');
     } catch (err) {
       setData({ categories: [], foods: [], settings: null, availableSeats: [] });
@@ -39,10 +53,9 @@ export function MenuProvider({ children }) {
   }, []);
 
   useEffect(() => {
-    const restaurantName = data.settings?.name;
-    if (!restaurantName) return;
-
     document.title = restaurantName;
+    const appleTitle = document.querySelector('meta[name="apple-mobile-web-app-title"]');
+    if (appleTitle) appleTitle.content = restaurantName;
     let manifest = document.querySelector('link[rel="manifest"]');
     if (!manifest) {
       manifest = document.createElement('link');
@@ -50,9 +63,9 @@ export function MenuProvider({ children }) {
       document.head.appendChild(manifest);
     }
     manifest.href = `${api.defaults.baseURL}/api/manifest.webmanifest`;
-  }, [data.settings?.name]);
+  }, [restaurantName]);
 
-  return <MenuContext.Provider value={{ ...normalizeMenuPayload(data), loading, error, refresh }}>{children}</MenuContext.Provider>;
+  return <MenuContext.Provider value={{ ...normalizeMenuPayload(data), restaurantName, loading, error, refresh }}>{children}</MenuContext.Provider>;
 }
 
 export function useMenu() {

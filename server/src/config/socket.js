@@ -1,22 +1,10 @@
 const { Server } = require('socket.io');
 const { tokenFromCookie, verify } = require('../utils/adminSession');
-
-const allowedOrigins = [process.env.CLIENT_URL];
-if (process.env.NODE_ENV !== 'production' && process.env.DEV_CLIENT_URL) {
-  allowedOrigins.push(process.env.DEV_CLIENT_URL);
-}
-
-function corsOrigin(origin, callback) {
-  if (!origin || allowedOrigins.includes(origin)) return callback(null, true);
-  return callback(new Error('Origin is not allowed by CORS'));
-}
+const { corsOptions } = require('./cors');
 
 function initSocket(server) {
   const io = new Server(server, {
-    cors: {
-      origin: corsOrigin,
-      credentials: true
-    }
+    cors: corsOptions
   });
 
   io.on('connection', (socket) => {

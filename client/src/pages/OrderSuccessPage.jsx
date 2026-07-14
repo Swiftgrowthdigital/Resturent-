@@ -6,11 +6,13 @@ import { getSocket } from '../lib/socket';
 import { SectionHeader } from '../components/SectionHeader';
 import { StatusPill } from '../components/StatusPill';
 import { Button } from '../components/Button';
+import { useMenu } from '../context/MenuContext';
 
 export function OrderSuccessPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const [order, setOrder] = useState(location.state?.order || readStoredOrder());
+  const { restaurantName } = useMenu();
 
   useEffect(() => {
     if (!order) return;
@@ -58,7 +60,7 @@ export function OrderSuccessPage() {
               Your order is on the way to the kitchen.
             </h1>
             <p className="mx-auto mt-3 max-w-2xl text-sm leading-6 text-slate-400">
-              The restaurant has received your request in real time. You can monitor status updates instantly.
+              {restaurantName} has received your request in real time. You can monitor status updates instantly.
             </p>
           </div>
         </div>
