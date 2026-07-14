@@ -7,19 +7,19 @@
 | Variable | Required | Notes |
 | --- | --- | --- |
 | `NODE_ENV` | Yes | `production` |
-| `PORT` | Render supplies | Do not hardcode a public port. |
+| `PORT` | Yes | `5000` for this deployment. Render may override it at runtime. |
 | `MONGODB_URI` | Yes | Atlas SRV URI with an application-only database user. |
 | `CLIENT_URL` | Yes | Exact Vercel HTTPS origin, without a trailing slash. |
-| `DEV_CLIENT_URL` | Development only | Local frontend origin; it is ignored when `NODE_ENV=production`. |
 | `TRUST_PROXY` | Yes | `true` on Render. |
-| `ADMIN_PASSWORD` | Yes | Long, unique dashboard password. |
-| `ADMIN_TOKEN_SECRET` | Yes | Random 32+ character secret; rotate to invalidate sessions. |
+| `ADMIN_PASSWORD` | Yes | Dashboard password; rotate the temporary production value immediately. |
+| `ADMIN_TOKEN_SECRET` | Yes | Random 64+ character secret; rotate to invalidate sessions. |
+| `JWT_SECRET` | Yes | Random 64+ character server-only secret. |
 | `SUPABASE_URL` | Yes | Project URL. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Yes | Server-only secret; never add it to Vercel. |
 | `SUPABASE_STORAGE_BUCKET` | Yes | Public image bucket, e.g. `restaurant-images`. |
-| `RESTAURANT_NAME` | Optional | Displayed restaurant name. |
-| `RESTAURANT_CURRENCY` | Optional | Defaults to `INR`. |
-| `ORDER_PREFIX` | Optional | Order number prefix. |
+| `RESTAURANT_NAME` | Yes | `The Chai Theka`. |
+| `RESTAURANT_CURRENCY` | Yes | `INR`. |
+| `ORDER_PREFIX` | Yes | `RK`. |
 
 ### Vercel frontend
 
@@ -41,9 +41,11 @@ Never place MongoDB, Supabase service-role, or dashboard secrets in a `VITE_*` v
 ## Supabase Storage
 
 1. Create a `restaurant-images` **public** bucket for published menu/category images.
-2. Put only `SUPABASE_URL` and `SUPABASE_SERVICE_ROLE_KEY` in Render.
+2. Put `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_STORAGE_BUCKET=restaurant-images` in Render. Copy the service-role key from **Supabase Dashboard → Settings → API → service_role key**.
 3. Do not expose the service-role key to the browser. The backend uploads files after MIME and signature checks.
 4. Public buckets permit image delivery; direct uploads remain server mediated. Supabase service keys bypass Storage RLS, so treat the key as a production secret. [Supabase Storage access control](https://supabase.com/docs/guides/storage/security/access-control)
+
+If `SUPABASE_SERVICE_ROLE_KEY` is blank in `server/.env`, copy the real value from **Supabase Dashboard → Settings → API → service_role key** before starting the server. The application intentionally exits and names this variable when it is missing.
 
 ## Render backend
 

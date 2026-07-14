@@ -36,9 +36,13 @@ cp client/.env.example client/.env
 npm run dev
 ```
 
+The server requires these production variables: `PORT`, `NODE_ENV`, `TRUST_PROXY`, `CLIENT_URL`, `MONGODB_URI`, `ADMIN_PASSWORD`, `ADMIN_TOKEN_SECRET`, `JWT_SECRET`, `RESTAURANT_NAME`, `RESTAURANT_CURRENCY`, `ORDER_PREFIX`, `SUPABASE_URL`, `SUPABASE_SERVICE_ROLE_KEY`, and `SUPABASE_STORAGE_BUCKET`.
+
+Keep MongoDB, dashboard, JWT, and Supabase service-role secrets in `server/.env` or Render only. Never use a `VITE_*` variable for a secret.
+
 ## Dashboard authentication
 
-The dashboard is protected by the `ADMIN_PASSWORD` and `ADMIN_TOKEN_SECRET` values in the server environment. Set strong, unique values before deployment; no default credentials are seeded.
+The dashboard is protected by `ADMIN_PASSWORD` and `ADMIN_TOKEN_SECRET`. `ADMIN_TOKEN_SECRET` and `JWT_SECRET` must each be at least 64 characters; set strong, unique values before deployment.
 
 ## Notes
 

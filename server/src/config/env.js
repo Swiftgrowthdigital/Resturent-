@@ -29,7 +29,7 @@ function validateEnvironment() {
   const production = process.env.NODE_ENV === 'production';
   const errors = [];
   const required = ['MONGODB_URI'];
-  if (production) required.push('CLIENT_URL', 'ADMIN_PASSWORD', 'ADMIN_TOKEN_SECRET', 'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_STORAGE_BUCKET');
+  if (production) required.push('CLIENT_URL', 'ADMIN_PASSWORD', 'ADMIN_TOKEN_SECRET', 'JWT_SECRET', 'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_STORAGE_BUCKET');
 
   for (const name of required) {
     if (!value(name)) errors.push(`${name} is required.`);
@@ -37,8 +37,11 @@ function validateEnvironment() {
   if (value('MONGODB_URI') && !/^mongodb(\+srv)?:\/\//.test(value('MONGODB_URI'))) {
     errors.push('MONGODB_URI must start with mongodb:// or mongodb+srv://.');
   }
-  if (value('ADMIN_TOKEN_SECRET') && value('ADMIN_TOKEN_SECRET').length < 32) {
-    errors.push('ADMIN_TOKEN_SECRET must be at least 32 characters long.');
+  if (value('ADMIN_TOKEN_SECRET') && value('ADMIN_TOKEN_SECRET').length < 64) {
+    errors.push('ADMIN_TOKEN_SECRET must be at least 64 characters long.');
+  }
+  if (value('JWT_SECRET') && value('JWT_SECRET').length < 64) {
+    errors.push('JWT_SECRET must be at least 64 characters long.');
   }
 
   for (const name of ['CLIENT_URL', ...(production ? [] : ['DEV_CLIENT_URL'])]) {
