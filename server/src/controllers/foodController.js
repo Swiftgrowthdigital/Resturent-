@@ -3,6 +3,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const Food = require('../models/Food');
 const Category = require('../models/Category');
 const { validateRequest } = require('../middlewares/validationMiddleware');
+const { deletePublicStorageUrl } = require('../config/supabase');
 
 const foodValidators = [
   body('name').optional().isString().trim().isLength({ min: 2, max: 120 }),
@@ -58,14 +59,14 @@ const updateFood = [
   const updates = Object.fromEntries(Object.entries(req.body).filter(([key]) => allowedKeys.includes(key)));
   if (Object.keys(updates).length === 0) return res.status(400).json({ message: 'No valid food fields supplied' });
   if (updates.category && !(await Category.exists({ _id: updates.category }))) return res.status(400).json({ message: 'Category not found' });
+  const existing = await Food.findById(req.params.id);
+  if (!existing) return res.status(404).json({ message: 'Food not found' });
   const food = await Food.findByIdAndUpdate(
     req.params.id,
     updates,
     { new: true, runValidators: true }
   );
-  if (!food) {
-    return res.status(404).json({ message: 'Food not found' });
-  }
+  if (updates.image && existing.image && updates.image !== existing.image) await deletePublicStorageUrl(existing.image);
   req.app.get('io')?.emit('menu:updated');
   res.json({ food });
 })
@@ -76,6 +77,7 @@ const deleteFood = asyncHandler(async (req, res) => {
   if (!food) {
     return res.status(404).json({ message: 'Food not found' });
   }
+  await deletePublicStorageUrl(food.image);
   req.app.get('io')?.emit('menu:updated');
   res.json({ message: 'Food deleted' });
 });

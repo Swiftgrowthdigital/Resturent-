@@ -1,16 +1,6 @@
 import { motion } from 'framer-motion';
 import { Coffee, Flame, Pizza, Sandwich, Sparkles, Star, UtensilsCrossed } from 'lucide-react';
 
-const FALLBACK_CATEGORIES = [
-  { _id: 'all', name: 'All' },
-  { _id: 'pizza', name: 'Pizza' },
-  { _id: 'burger', name: 'Burger' },
-  { _id: 'pasta', name: 'Pasta' },
-  { _id: 'french-fries', name: 'French Fries' },
-  { _id: 'maggi', name: 'Maggi' },
-  { _id: 'softy', name: 'Softy' }
-];
-
 const ICONS = {
   all: Star,
   pizza: Pizza,
@@ -22,7 +12,7 @@ const ICONS = {
 };
 
 export function CategoryTabs({ categories, activeCategory, onChange }) {
-  const tabs = categories.length ? [{ _id: 'all', name: 'All' }, ...categories] : FALLBACK_CATEGORIES;
+  const tabs = [{ _id: 'all', name: 'All' }, ...categories];
 
   return (
     <div className="bg-[#faf7f2] px-4 pb-4">
@@ -44,8 +34,8 @@ export function CategoryTabs({ categories, activeCategory, onChange }) {
                   : 'border-stone-200 bg-white text-stone-700 shadow-[0_8px_18px_rgba(28,25,23,0.06)]'
               }`}
             >
-              <span className={`flex h-11 w-11 items-center justify-center rounded-2xl ${active ? 'bg-white/16' : 'bg-stone-50'}`}>
-                <Icon className="h-5 w-5" />
+              <span className={`flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl ${active ? 'bg-white/16' : 'bg-stone-50'}`}>
+                {category.image ? <img src={category.image} alt="" className="h-full w-full object-cover" /> : <Icon className="h-5 w-5" />}
               </span>
               <span className="max-w-[74px] truncate text-sm font-semibold">{category.name}</span>
             </motion.button>

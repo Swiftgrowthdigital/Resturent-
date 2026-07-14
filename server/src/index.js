@@ -1,9 +1,6 @@
 require('dotenv').config();
 const { validateEnvironment } = require('./config/env');
 validateEnvironment();
-if (process.env.NODE_ENV !== 'production') {
-  console.log('Restaurant Name:', process.env.RESTAURANT_NAME);
-}
 const http = require('http');
 const app = require('./app');
 const { connectDatabase } = require('./config/db');

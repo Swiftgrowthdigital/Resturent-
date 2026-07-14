@@ -1,4 +1,5 @@
 import { io } from 'socket.io-client';
+import { ADMIN_TOKEN_KEY } from './api';
 
 let socket;
 
@@ -6,7 +7,7 @@ export function getSocket() {
   if (!socket) {
     socket = io(import.meta.env.VITE_API_URL, {
       autoConnect: false,
-      withCredentials: true
+      auth: { token: localStorage.getItem(ADMIN_TOKEN_KEY) || '' }
     });
   }
   return socket;

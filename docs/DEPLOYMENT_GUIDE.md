@@ -12,7 +12,6 @@
 | `CLIENT_URL` | Yes | Exact Vercel HTTPS origin, without a trailing slash. |
 | `TRUST_PROXY` | Yes | `true` on Render. |
 | `ADMIN_PASSWORD` | Yes | Dashboard password; rotate the temporary production value immediately. |
-| `ADMIN_TOKEN_SECRET` | Yes | Random 64+ character secret; rotate to invalidate sessions. |
 | `JWT_SECRET` | Yes | Random 64+ character server-only secret. |
 | `SUPABASE_URL` | Yes | Project URL. |
 | `SUPABASE_SERVICE_ROLE_KEY` | Yes | Server-only secret; never add it to Vercel. |

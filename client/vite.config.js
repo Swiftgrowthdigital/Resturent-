@@ -4,7 +4,7 @@ import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
-  const restaurantName = String(env.VITE_RESTAURANT_NAME || '').trim() || 'Restaurant';
+  const restaurantName = '';
   if (mode === 'production' && String(env.VITE_USE_DEMO_DATA).toLowerCase() === 'true') {
     throw new Error('VITE_USE_DEMO_DATA=true is forbidden in production builds.');
   }

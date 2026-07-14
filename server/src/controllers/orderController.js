@@ -57,7 +57,7 @@ const createOrder = [
       { $inc: { value: 1 } },
       { new: true, upsert: true }
     );
-    const orderNumber = `RK${counter.value}`;
+    const orderNumber = `${process.env.ORDER_PREFIX}${counter.value}`;
 
     const order = await Order.create({
       clientOrderId,

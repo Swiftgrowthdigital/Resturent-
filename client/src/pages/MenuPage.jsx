@@ -29,7 +29,7 @@ export function MenuPage() {
   const safeCategories = toArray(categories);
   const safeFoods = toArray(foods);
   const safeAvailableSeats = toArray(availableSeats);
-  const currencySymbol = settings?.currency === 'INR' ? '₹' : (settings?.currencySymbol || 'INR ');
+  const currencySymbol = settings?.currency || '';
   const seatStatus = !seatNumber ? 'idle' : safeAvailableSeats.some((seat) => String(seat) === seatNumber) ? 'valid' : 'invalid';
 
   const visibleFoods = useMemo(() => {

@@ -26,10 +26,8 @@ function normalizeOrigin(name, required) {
 }
 
 function validateEnvironment() {
-  const production = process.env.NODE_ENV === 'production';
   const errors = [];
-  const required = ['MONGODB_URI'];
-  if (production) required.push('CLIENT_URL', 'ADMIN_PASSWORD', 'ADMIN_TOKEN_SECRET', 'JWT_SECRET', 'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_STORAGE_BUCKET');
+  const required = ['PORT', 'NODE_ENV', 'TRUST_PROXY', 'CLIENT_URL', 'MONGODB_URI', 'ADMIN_PASSWORD', 'JWT_SECRET', 'RESTAURANT_NAME', 'RESTAURANT_CURRENCY', 'ORDER_PREFIX', 'SUPABASE_URL', 'SUPABASE_SERVICE_ROLE_KEY', 'SUPABASE_STORAGE_BUCKET'];
 
   for (const name of required) {
     if (!value(name)) errors.push(`${name} is required.`);
@@ -37,14 +35,16 @@ function validateEnvironment() {
   if (value('MONGODB_URI') && !/^mongodb(\+srv)?:\/\//.test(value('MONGODB_URI'))) {
     errors.push('MONGODB_URI must start with mongodb:// or mongodb+srv://.');
   }
-  if (value('ADMIN_TOKEN_SECRET') && value('ADMIN_TOKEN_SECRET').length < 64) {
-    errors.push('ADMIN_TOKEN_SECRET must be at least 64 characters long.');
-  }
+  if (value('PORT') && (!/^\d+$/.test(value('PORT')) || Number(value('PORT')) < 1 || Number(value('PORT')) > 65535)) errors.push('PORT must be a valid TCP port number.');
+  if (value('NODE_ENV') && !['development', 'test', 'production'].includes(value('NODE_ENV'))) errors.push('NODE_ENV must be development, test, or production.');
+  if (!['true', 'false'].includes(value('TRUST_PROXY').toLowerCase())) errors.push('TRUST_PROXY must be true or false.');
+  if (value('RESTAURANT_CURRENCY') && !/^[A-Z]{3}$/.test(value('RESTAURANT_CURRENCY'))) errors.push('RESTAURANT_CURRENCY must be a three-letter ISO currency code.');
+  if (value('ORDER_PREFIX') && !/^[A-Z0-9-]{1,12}$/.test(value('ORDER_PREFIX'))) errors.push('ORDER_PREFIX may contain only uppercase letters, digits, and hyphens.');
   if (value('JWT_SECRET') && value('JWT_SECRET').length < 64) {
     errors.push('JWT_SECRET must be at least 64 characters long.');
   }
 
-  for (const name of ['CLIENT_URL', ...(production ? [] : ['DEV_CLIENT_URL'])]) {
+  for (const name of ['CLIENT_URL', ...(process.env.NODE_ENV === 'production' ? [] : ['DEV_CLIENT_URL'])]) {
     if (!value(name)) continue;
     try {
       normalizeOrigin(name, false);

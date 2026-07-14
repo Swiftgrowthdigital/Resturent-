@@ -1,7 +1,9 @@
-const { tokenFromCookie, verify } = require('../utils/adminSession');
+const { verify } = require('../utils/adminSession');
 
 function protect(req, res, next) {
-  const session = verify(tokenFromCookie(req.headers.cookie));
+  const authorization = req.get('authorization') || '';
+  const match = authorization.match(/^Bearer\s+(.+)$/i);
+  const session = verify(match?.[1]);
   if (!session) return res.status(401).json({ message: 'Administrator sign-in required.' });
   req.admin = session;
   next();

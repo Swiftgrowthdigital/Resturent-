@@ -3,6 +3,7 @@ const asyncHandler = require('../utils/asyncHandler');
 const Category = require('../models/Category');
 const Food = require('../models/Food');
 const { validateRequest } = require('../middlewares/validationMiddleware');
+const { deletePublicStorageUrl } = require('../config/supabase');
 
 const categoryValidators = [
   body('name').isString().trim().isLength({ min: 2, max: 80 }),
@@ -34,14 +35,14 @@ const updateCategory = [
   ...categoryValidators,
   validateRequest,
   asyncHandler(async (req, res) => {
+  const existing = await Category.findById(req.params.id);
+  if (!existing) return res.status(404).json({ message: 'Category not found' });
   const category = await Category.findByIdAndUpdate(
     req.params.id,
     { name: req.body.name, icon: req.body.icon || '', image: req.body.image || '', sortOrder: Number(req.body.sortOrder || 0), status: req.body.status !== false },
     { new: true, runValidators: true }
   );
-  if (!category) {
-    return res.status(404).json({ message: 'Category not found' });
-  }
+  if (req.body.image && existing.image && req.body.image !== existing.image) await deletePublicStorageUrl(existing.image);
   req.app.get('io')?.emit('menu:updated');
   res.json({ category });
 })
@@ -58,6 +59,7 @@ const deleteCategory = asyncHandler(async (req, res) => {
   if (!category) {
     return res.status(404).json({ message: 'Category not found' });
   }
+  await deletePublicStorageUrl(category.image);
   req.app.get('io')?.emit('menu:updated');
   res.json({ message: 'Category deleted' });
 });

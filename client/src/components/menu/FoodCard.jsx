@@ -15,7 +15,7 @@ export function FoodCard({ food, currencySymbol, index }) {
       className="grid grid-cols-[104px_1fr] gap-3 rounded-3xl border border-stone-100 bg-white p-3 shadow-[0_12px_30px_rgba(28,25,23,0.08)] min-[390px]:grid-cols-[120px_1fr]"
     >
       <div className="relative h-[120px] overflow-hidden rounded-2xl min-[390px]:h-[132px]">
-        <img src={food.image} alt={food.name} className="h-full w-full object-cover" loading="lazy" />
+        {food.image ? <img src={food.image} alt={food.name} className="h-full w-full object-cover" loading="lazy" /> : <div className="h-full w-full bg-stone-100" aria-label={`${food.name} image unavailable`} />}
         <span className="absolute left-2 top-2 flex h-6 w-6 items-center justify-center rounded-lg border-2 border-white bg-white shadow-sm">
           <span className={`h-3 w-3 rounded-full ${food.veg ? 'bg-emerald-500' : 'bg-red-500'}`} />
         </span>

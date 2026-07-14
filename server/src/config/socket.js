@@ -1,5 +1,5 @@
 const { Server } = require('socket.io');
-const { tokenFromCookie, verify } = require('../utils/adminSession');
+const { verify } = require('../utils/adminSession');
 const { corsOptions } = require('./cors');
 
 function initSocket(server) {
@@ -8,7 +8,9 @@ function initSocket(server) {
   });
 
   io.on('connection', (socket) => {
-    if (verify(tokenFromCookie(socket.handshake.headers.cookie))) socket.join('dashboard');
+    const authorization = socket.handshake.auth?.token || socket.handshake.headers.authorization || '';
+    const token = String(authorization).replace(/^Bearer\s+/i, '');
+    if (verify(token)) socket.join('dashboard');
   });
 
   return io;
