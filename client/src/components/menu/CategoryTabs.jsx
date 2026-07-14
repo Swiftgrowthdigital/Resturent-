@@ -35,7 +35,7 @@ export function CategoryTabs({ categories, activeCategory, onChange }) {
               }`}
             >
               <span className={`flex h-11 w-11 items-center justify-center overflow-hidden rounded-2xl ${active ? 'bg-white/16' : 'bg-stone-50'}`}>
-                {category.image ? <img src={category.image} alt="" className="h-full w-full object-cover" /> : <Icon className="h-5 w-5" />}
+                {category.image ? <img src={category.image} alt="" className="h-full w-full object-cover" loading="lazy" decoding="async" /> : <Icon className="h-5 w-5" />}
               </span>
               <span className="max-w-[74px] truncate text-sm font-semibold">{category.name}</span>
             </motion.button>

@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { Clock3, MapPin, UtensilsCrossed } from 'lucide-react';
+import { Clock3, MapPin } from 'lucide-react';
 
 export function Header({ restaurantName, address, status = 'Open Now' }) {
   return (
@@ -10,8 +10,8 @@ export function Header({ restaurantName, address, status = 'Open Now' }) {
       className="sticky top-0 z-40 border-b border-stone-200/70 bg-white/90 backdrop-blur-xl"
     >
       <div className="mx-auto flex w-full max-w-3xl items-center gap-3 px-4 py-3">
-        <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-2xl bg-gradient-to-br from-orange-500 to-red-500 text-white shadow-[0_10px_24px_rgba(249,115,22,0.26)]">
-          <UtensilsCrossed className="h-6 w-6" />
+        <div className="h-12 w-12 shrink-0 overflow-hidden rounded-2xl bg-white shadow-[0_10px_24px_rgba(249,115,22,0.26)] ring-1 ring-orange-100">
+          <img src="/icon-192.png" alt={`${restaurantName} logo`} className="h-full w-full object-cover" width="48" height="48" />
         </div>
 
         <div className="min-w-0 flex-1">

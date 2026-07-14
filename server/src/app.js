@@ -40,6 +40,9 @@ app.get('/api/brand', (_req, res) => {
 });
 
 app.get('/api/manifest.webmanifest', (_req, res) => {
+  const clientOrigin = process.env.NODE_ENV === 'production'
+    ? process.env.CLIENT_URL
+    : (process.env.DEV_CLIENT_URL || process.env.CLIENT_URL);
   res.type('application/manifest+json').json({
     name: getRestaurantName(),
     short_name: getRestaurantName(),
@@ -47,7 +50,7 @@ app.get('/api/manifest.webmanifest', (_req, res) => {
     display: 'standalone',
     background_color: '#faf7f2',
     theme_color: '#f97316',
-    icons: [{ src: '/icon.svg', sizes: 'any', type: 'image/svg+xml', purpose: 'any maskable' }]
+    icons: [{ src: `${clientOrigin}/icon-192.png`, sizes: '192x192', type: 'image/png', purpose: 'any maskable' }]
   });
 });
 
