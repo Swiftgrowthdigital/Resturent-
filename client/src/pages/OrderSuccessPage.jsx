@@ -1,5 +1,5 @@
 import { motion } from 'framer-motion';
-import { CheckCircle2, Clock3, Hash, ShoppingBag, Table2 } from 'lucide-react';
+import { CheckCircle2, Clock3, Hash, MessageCircle, ShoppingBag, Table2 } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { getSocket } from '../lib/socket';
@@ -67,7 +67,14 @@ export function OrderSuccessPage() {
 
         <div className="mt-8 grid gap-4 md:grid-cols-2">
           <Metric label="Order number" value={order.orderNumber} icon={Hash} />
-          <Metric label="Table number" value={order.tableNumber} icon={Table2} />
+          <Metric
+            label="WhatsApp Support"
+            value="+91 91285 96738"
+            helperText="Tap to Chat"
+            icon={MessageCircle}
+            iconClassName="text-green-500"
+            href="https://wa.me/919128596738"
+          />
           <Metric label="Seat number" value={order.seatNumber || 'Not set'} icon={Table2} />
           <Metric label="Status" value={<StatusPill status={order.status} />} icon={CheckCircle2} />
           <Metric
@@ -90,14 +97,34 @@ export function OrderSuccessPage() {
   );
 }
 
-function Metric({ label, value, icon: Icon }) {
-  return (
-    <div className="rounded-[24px] border border-white/10 bg-white/[0.04] p-4">
+function Metric({ label, value, helperText, icon: Icon, iconClassName = 'text-brand-300', href }) {
+  const content = (
+    <>
       <div className="flex items-center justify-between gap-3">
         <p className="text-xs font-bold uppercase tracking-[0.24em] text-slate-500">{label}</p>
-        <Icon className="h-4 w-4 text-brand-300" />
+        <Icon className={`h-4 w-4 ${iconClassName}`} />
       </div>
       <div className="mt-3 text-sm font-semibold text-white">{value}</div>
+      {helperText ? <p className="mt-1 text-xs text-slate-400">{helperText}</p> : null}
+    </>
+  );
+
+  if (href) {
+    return (
+      <a
+        href={href}
+        target="_blank"
+        rel="noreferrer"
+        className="block rounded-[24px] border border-white/10 bg-white/[0.04] p-4"
+      >
+        {content}
+      </a>
+    );
+  }
+
+  return (
+    <div className="rounded-[24px] border border-white/10 bg-white/[0.04] p-4">
+      {content}
     </div>
   );
 }
