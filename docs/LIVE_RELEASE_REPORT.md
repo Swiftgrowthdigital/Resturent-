@@ -27,7 +27,7 @@ This is a runtime-release score, not a source-quality score. The source audit re
 
 | Check | Status | Result |
 | --- | --- | --- |
-| Frontend runtime startup | PASS | Started Vite on `127.0.0.1:5173`; `GET /menu` returned HTTP 200 and contained the React root element. Process was stopped after verification. |
+| Frontend runtime startup | PASS | Started Vite on its local development listener; `GET /menu` returned HTTP 200 and contained the React root element. Process was stopped after verification. |
 | Production build | PASS | `npm run build` completed successfully. |
 | PWA build output | PASS (static) | Workbox generated `sw.js`, `workbox-*.js`, and a 13-entry precache. |
 | Dependency security audit | PASS | `npm audit --omit=dev --workspaces --json` reported 0 known production vulnerabilities. |

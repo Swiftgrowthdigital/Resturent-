@@ -10,6 +10,7 @@
 | `PORT` | Render supplies | Do not hardcode a public port. |
 | `MONGODB_URI` | Yes | Atlas SRV URI with an application-only database user. |
 | `CLIENT_URL` | Yes | Exact Vercel HTTPS origin, without a trailing slash. |
+| `DEV_CLIENT_URL` | Development only | Local frontend origin; it is ignored when `NODE_ENV=production`. |
 | `TRUST_PROXY` | Yes | `true` on Render. |
 | `ADMIN_PASSWORD` | Yes | Long, unique dashboard password. |
 | `ADMIN_TOKEN_SECRET` | Yes | Random 32+ character secret; rotate to invalidate sessions. |
@@ -49,12 +50,14 @@ Never place MongoDB, Supabase service-role, or dashboard secrets in a `VITE_*` v
 2. Set root directory to the repository root, build command `npm ci`, and start command `npm run start --workspace server`.
 3. Add every backend environment variable above, deploy, then open `/api/health`.
 4. Set `CLIENT_URL` to the final Vercel origin and redeploy whenever that origin changes.
+   Set it to `https://restaurant.swiftgrowthdigital.com` for this deployment.
 
 ## Vercel frontend
 
 1. Import the repository and set root directory to `client`.
 2. Build command: `npm run build`; output directory: `dist`.
 3. Set `VITE_API_URL` to the Render URL and `VITE_USE_DEMO_DATA=false`, then deploy.
+   Set it to `https://resturent-server-k521.onrender.com` for this deployment.
 4. Add a rewrite so client routes serve `index.html`:
 
 ```json

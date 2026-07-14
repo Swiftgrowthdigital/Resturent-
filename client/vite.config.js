@@ -44,11 +44,6 @@ export default defineConfig(({ mode }) => {
       }
     })
   ],
-  server: {
-    host: '0.0.0.0',
-    proxy: {
-      '/api': 'http://localhost:5000'
-    }
-  }
+  server: { host: '0.0.0.0' }
   };
 });
