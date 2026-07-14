@@ -16,6 +16,7 @@ const orderSchema = new mongoose.Schema(
   {
     clientOrderId: { type: String, required: true, unique: true },
     orderNumber: { type: String, required: true, unique: true },
+    createdAt: { type: Date, default: Date.now },
     seatNumber: { type: String, required: true },
     items: [orderItemSchema],
     subtotal: { type: Number, required: true },
